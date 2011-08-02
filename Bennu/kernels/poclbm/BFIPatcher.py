@@ -1,4 +1,4 @@
-# Copyright (C) 2011 by jedi95 <jedi95@gmail.com> and 
+# Copyright (C) 2011 by jedi95 <jedi95@gmail.com> and
 #                       CFSworks <CFSworks@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,7 +27,7 @@ class BFIPatcher(object):
     """Patches .ELF files compiled for Evergreen GPUs; changes the microcode
     so that any BYTE_ALIGN_INT instructions become BFI_INT.
     """
-
+    
     def __init__(self, interface):
         self.interface = interface
     

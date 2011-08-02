@@ -59,7 +59,7 @@ class Transport(object):
                 self.seen_identifiers.add(w.identifier)
                 self.current_identifier = w.identifier
         self.work.add(self.preprocessor(w))
-
+    
     @defer.inlineCallbacks
     def work_filler(self):
         while True:

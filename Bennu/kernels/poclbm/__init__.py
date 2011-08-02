@@ -1,4 +1,4 @@
-# Copyright (C) 2011 by jedi95 <jedi95@gmail.com> and 
+# Copyright (C) 2011 by jedi95 <jedi95@gmail.com> and
 #                       CFSworks <CFSworks@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,7 +42,7 @@ def _swap(s, l):
 
 
 class KernelData(object):
-    """This class is a container for all the data required for a single kernel 
+    """This class is a container for all the data required for a single kernel
     execution.
     """
     
@@ -56,7 +56,7 @@ class KernelData(object):
         nonceRange.midstate = calculateMidstate(_swap(nonceRange.data[:64], 4))
         #print nonceRange.midstate.encode('hex')
         data = np.array(
-               unpack('IIII', _swap(nonceRange.unit.data[64:], 4)), dtype=np.uint32)
+            unpack('IIII', _swap(nonceRange.unit.data[64:], 4)), dtype=np.uint32)
         
         # Vectors do twice the work per execution, so calculate accordingly...
         rateDivisor = 2 if vectors else 1
@@ -111,8 +111,8 @@ class KernelData(object):
             rotr(self.state2[5], 13) ^ rotr(self.state2[5], 22)) +
             ((self.state2[5] & self.state2[6]) | (self.state2[7] &
             (self.state2[5] | self.state2[6]))))
-        
-        
+
+
 class Kernel(object):
     """A Phoenix Miner-compatible kernel that uses the poclbm OpenCL kernel."""
     '''
@@ -181,12 +181,12 @@ class Kernel(object):
         
         # We need a QueueReader to efficiently provide our dedicated thread
         # with work.
-        #self.qr = QueueReader(self.core, lambda nr: self.preprocess(nr), 
+        #self.qr = QueueReader(self.core, lambda nr: self.preprocess(nr),
         #                        lambda x,y: self.size * 1 << self.loopExponent)
         
         # The platform selection must be valid to mine.
         platforms = cl.get_platforms()
-
+        
         if self.PLATFORM >= len(platforms) or \
             (self.PLATFORM is None and len(platforms) > 1):
             self.interface.log(
@@ -202,7 +202,7 @@ class Kernel(object):
             return
         elif self.PLATFORM is None:
             self.PLATFORM = 0
-            
+        
         devices = platforms[self.PLATFORM].get_devices()
         print len(devices), self.DEVICE, self.DEVICE >= len(devices), (self.DEVICE is None and len(devices) > 1)
         
@@ -216,7 +216,7 @@ class Kernel(object):
             
             for i,d in enumerate(devices):
                 self.interface.log('    [%d]\t%s' % (i, d.name), False, False)
-        
+            
             # Since the device selection is invalid, we can't mine.
             self.interface.fatal()
             return
@@ -239,9 +239,9 @@ class Kernel(object):
         self.output_buf = cl.Buffer(
             self.context, cl.mem_flags.WRITE_ONLY | cl.mem_flags.USE_HOST_PTR,
             hostbuf=self.output)
-    
-        self.applyMeta()
         
+        self.applyMeta()
+    
     def applyMeta(self):
         """Apply any kernel-specific metadata."""
         self.interface.setMeta('kernel', 'poclbm r%s' % self.REVISION)
@@ -296,14 +296,14 @@ class Kernel(object):
         # Finally, the actual work of loading the kernel...
         try:
             binary = open(fileName, 'rb')
-        except IOError: 
+        except IOError:
             binary = None
         
         try:
             if binary is None:
                 self.kernel = cl.Program(
                     self.context, kernel).build(self.defines)
-                 
+                
                 #apply BFI_INT if enabled
                 if self.BFI_INT:
                     #patch the binary output from the compiler
@@ -325,7 +325,7 @@ class Kernel(object):
                 binaryData = binary.read()
                 self.kernel = cl.Program(
                     self.context, [device], [binaryData]).build(self.defines)
-                    
+        
         except cl.LogicError:
             self.interface.fatal("Failed to compile OpenCL kernel!")
             return
@@ -335,35 +335,35 @@ class Kernel(object):
             return
         finally:
             if binary: binary.close()
-       
+        
         cl.unload_compiler()
         
         # If the user didn't specify their own worksize, use the maxium
         # supported by the device.
         maxSize = self.kernel.search.get_work_group_info(
-                  cl.kernel_work_group_info.WORK_GROUP_SIZE, self.device)
+            cl.kernel_work_group_info.WORK_GROUP_SIZE, self.device)
         
         if self.WORKSIZE is None:
             self.WORKSIZE = maxSize
         else:
             if self.WORKSIZE > maxSize:
                 self.interface.log('Warning: Worksize exceeds the maximum of '
-                                    + str(maxSize) + ', using default.')
+                    + str(maxSize) + ', using default.')
             if self.WORKSIZE < 1:
                 self.interface.log('Warning: Invalid worksize, using default.')
             
             self.WORKSIZE = min(self.WORKSIZE, maxSize)
             self.WORKSIZE = max(self.WORKSIZE, 1)
             #if the worksize is not a power of 2, round down to the nearest one
-            if (self.WORKSIZE & (self.WORKSIZE - 1)) != 0:   
+            if (self.WORKSIZE & (self.WORKSIZE - 1)) != 0:
                 self.WORKSIZE = 1 << int(math.floor(math.log(X)/math.log(2)))
-            
+        
         self.interface.setWorkFactor(self.WORKSIZE)
     
     def updateIterations(self):
         # Set up the number of internal iterations to run if FASTLOOP enabled
         rate = self.core.getRate()
-         
+        
         if not (rate <= 0):
             #calculate the number of iterations to run
             EXP = max(0, (math.log(rate)/math.log(2)) - (self.AGGRESSION - 8))
@@ -374,9 +374,9 @@ class Kernel(object):
                 EXP = round(EXP)
             else:
                 EXP = self.loopExponent
-                
+            
             self.loopExponent = int(max(0, EXP))
-        
+    
     def preprocess(self, nr):
         if self.FASTLOOP:
             self.updateIterations()
@@ -397,7 +397,7 @@ class Kernel(object):
         # Iterate over only the first OUTPUT_SIZE items. Exclude the last item
         # which is a duplicate of the most recently-found nonce.
         for i in xrange(self.OUTPUT_SIZE):
-            if output[i]:   
+            if output[i]:
                 data = nr.data[:76] + struct.pack(">I", output[i])
                 hash_ = int(hashlib.sha256(hashlib.sha256(data).digest()).digest()[::-1].encode('hex'), 16)
                 if hash_ <= nr.target:
@@ -412,7 +412,7 @@ class Kernel(object):
         @defer.inlineCallbacks
         def work():
             while flag[0]:
-
+                
                 work = work_getter()
                 if work is None:
                     print "Worker starved!"
@@ -420,7 +420,7 @@ class Kernel(object):
                     continue
                 
                 data, i = work
-
+                
                 self.kernel.search(
                     self.commandQueue, (data.size, ), (self.WORKSIZE, ),
                     data.state[0], data.state[1], data.state[2], data.state[3],
@@ -435,20 +435,20 @@ class Kernel(object):
                     self.commandQueue, self.output_buf, self.output)
                 #self.commandQueue.finish()
                 yield threads.deferToThread(self.commandQueue.finish)
-
+                
                 # The OpenCL code will flag the last item in the output buffer
                 # when it finds a valid nonce. If that's the case, send it to
                 # the main thread for postprocessing and clean the buffer
                 # for the next pass.
                 if self.output[self.OUTPUT_SIZE]:
                     self.postprocess(self.output.copy(), data.nr, solution_putter)
-
+                    
                     self.output.fill(0)
                     cl.enqueue_write_buffer(
                         self.commandQueue, self.output_buf, self.output)
                     #for data in res:
                     #    solution_putter(data)
-
+        
         work()
         return lambda: flag.__setitem__(0, False)
- 
+

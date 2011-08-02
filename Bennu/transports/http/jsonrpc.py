@@ -1,10 +1,9 @@
 from __future__ import division
 
-import base64
 import json
 
 from twisted.internet import defer
-from twisted.python import log, util
+from twisted.python import util
 from twisted.web import client, error
 
 def getPageAndHeaders(url, contextFactory=None, *args, **kwargs):
@@ -41,7 +40,7 @@ class Proxy(object):
     def callRemote(self, method, *params, **kwargs):
         if not set(['headers', 'receive_headers']).issuperset(kwargs.iterkeys()):
             raise ValueError()
-       
+        
         headers = util.InsensitiveDict({
             'Content-Type': 'application/json',
         })

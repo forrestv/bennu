@@ -1,9 +1,7 @@
 import sys
 
-from twisted.internet import defer, reactor, task
-from twisted.python import log
+from twisted.internet import reactor, task
 
-from util import jsonrpc, deferral
 from . import kernels, transports
 
 def parse_args():
@@ -19,11 +17,11 @@ def parse_args():
             return
     miner_args2 = {}
     for a in miner_args:
-       k, v = a.split('=', 1)
-       if k in miner_args2:
-         print 'Duplicate argument %r, exiting!' % (k,)
-         return
-       miner_args2[k] = v
+        k, v = a.split('=', 1)
+        if k in miner_args2:
+            print 'Duplicate argument %r, exiting!' % (k,)
+            return
+        miner_args2[k] = v
     kernel_name = miner_args2.pop('KERNEL', 'python')
     return kernel_name, miner_args2, urls
 
@@ -39,16 +37,16 @@ def run():
     work_done = [0, 0]
     frames_done = [-1]
     def get_work():
-       for tp in tps:
-           work = tp.get_work()
-           if work is not None:
-               work_done[0] += work_done[1]
-               frames_done[0] += 1
-               work_done[1] = work.size
-               return work
+        for tp in tps:
+            work = tp.get_work()
+            if work is not None:
+                work_done[0] += work_done[1]
+                frames_done[0] += 1
+                work_done[1] = work.size
+                return work
     def got_solution(data):
-       for tp in tps: # XXX
-           tp.send_solution(data)
+        for tp in tps: # XXX
+            tp.send_solution(data)
     
     start_time = reactor.seconds()
     kernel.start(get_work, got_solution)
