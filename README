@@ -1,0 +1,15 @@
+This is a Python Bitcoin miner that is designed to be very simple and clean.
+
+Kernels and transports are completely pluggable.
+
+Current kernels:
+
+* python - pure Python kernel using hashlib, as an example of a kernel and for testing
+* poclbm - poclbm's OpenCL kernel, as distributed by phoenix-miner
+
+Current transports:
+
+* http - Standard JSON-RPC interface with:
+    * long polling using X-Long-Polling header
+    * indication of accepting H != 0 targets with X-All-Targets
+    * work identifier support (X-Work-Identifier)
