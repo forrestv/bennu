@@ -6,7 +6,7 @@ from twisted.python import log
 from util import jsonrpc, deferral
 from . import kernels, transports
 
-def run():
+def parse_args():
     urls = []
     miner_args = []
     for arg in sys.argv[1:]:
@@ -25,8 +25,12 @@ def run():
          return
        miner_args2[k] = v
     kernel_name = miner_args2.pop('KERNEL', 'python')
+    return kernel_name, miner_args2, urls
+
+def run():
+    kernel_name, kernel_args, urls = parse_args()
     
-    kernel = kernels.get(kernel_name)(**miner_args2)
+    kernel = kernels.get(kernel_name)(**kernel_args)
     
     tps = [transports.get(url, kernel.preprocess) for url in urls]
     
@@ -45,6 +49,7 @@ def run():
     def got_solution(data):
        for tp in tps: # XXX
            tp.send_solution(data)
+    
     start_time = reactor.seconds()
     kernel.start(get_work, got_solution)
     

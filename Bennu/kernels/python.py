@@ -9,7 +9,7 @@ def sleep(t):
     return d
 
 def _do_work(work):
-    # takes work, returns list of matching nonces
+    # takes work, returns list of matching data
     good = []
     for i in xrange(work.nonce_start, work.nonce_end):
         data = work.data[:76] + struct.pack("<I", i)
